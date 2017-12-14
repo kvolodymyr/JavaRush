@@ -13,8 +13,8 @@ import java.util.List;
 
 public class Solution {
     public static List<LineItem> lines = new ArrayList<LineItem>();
-    public static ArrayList<String> lines1 = new ArrayList<String>(50);
-    public static ArrayList<String> lines2 = new ArrayList<String>(50);
+    public static ArrayList<String> older = new ArrayList<String>(50);
+    public static ArrayList<String> newest = new ArrayList<String>(50);
 
     public static void main(String[] args) throws IOException {
         BufferedReader conReader = new BufferedReader(new InputStreamReader(System.in));
@@ -26,48 +26,33 @@ public class Solution {
         BufferedReader reader2 = new BufferedReader(new FileReader(fileName2));
 
         while (reader1.ready()) {
-            lines1.add(reader1.readLine());
+            older.add(reader1.readLine());
         }
         reader1.close();
         while (reader2.ready()) {
-            lines2.add(reader2.readLine());
+            newest.add(reader2.readLine());
         }
         reader2.close();
 
-
-        String line, s1, s2, s3;
-        for (int i = 0; i < lines1.size(); i++) {
-            line = lines1.get(i);
-            s1 = s2 = s3 = null;
-            if (i > 0) {
-                s1 = lines2.get(i - 1);
+        int i = 0, j = 0;
+        while(i < older.size() || j < newest.size()) {
+            if(i < older.size() && j < newest.size() && older.get(i).equals(newest.get(j))) {
+                Solution.lines.add(new LineItem(Type.SAME, older.get(i)));
+                i++; j++;
+            } else {
+                if (i >= older.size() || j + 1 < newest.size() && older.get(i).equals(newest.get(j + 1))) {
+                    Solution.lines.add(new LineItem(Type.ADDED, newest.get(j)));
+                    j++;
+                } else if (j >= newest.size() || i + 1 < older.size() && newest.get(j).equals(older.get(i+1))) {
+                    Solution.lines.add(new LineItem(Type.REMOVED, older.get(i)));
+                    i++;
+                }
             }
-            if (i < lines2.size()) {
-                s2 = lines2.get(i);
-            }
-            if (i + 1 < lines2.size()) {
-                s3 = lines2.get(i + 1);
-            }
-
-            if (!line.equals(s1) && !line.equals(s2) && !line.equals(s3)) {
-                Solution.lines.add(new LineItem(Type.REMOVED, line));
-                lines2.add(i, line);
-            }
-
-            if (!line.equals(s1) && !line.equals(s2) && line.equals(s3)) {
-                Solution.lines.add(new LineItem(Type.ADDED, s2));
-                lines1.add(i, s2);
-            }
-
-            if (!line.equals(s1) && line.equals(s2) && !line.equals(s3)) {
-                Solution.lines.add(new LineItem(Type.SAME, line));
-            }
-        }
+        };
 
         for (LineItem li : Solution.lines)
             System.out.println(li.type + " " + li.line);
     }
-
 
     public static enum Type {
         ADDED,        //добавлена новая строка
